@@ -9,7 +9,8 @@ const OutfitCreatorPage = () => {
         shoes: '',
         accessories: ''
     });
-    const [savedOutfit, setSavedOutfit] = useState(null);
+    const [savedOutfits, setSavedOutfits] = useState([]); // Store saved outfits
+    const [previewOutfit, setPreviewOutfit] = useState(null);
 
     useEffect(() => {
         fetchClothingItems();
@@ -31,10 +32,10 @@ const OutfitCreatorPage = () => {
         setOutfit({ ...outfit, [name]: value });
     };
 
-    const handleSaveOutfit = () => {
+    const handleGenerateOutfit = () => {
         const selectedItems = Object.values(outfit).filter(id => id);
         if (selectedItems.length === 0) {
-            alert("Please select at least one item to save the outfit.");
+            alert("Please select at least one item to generate an outfit.");
             return;
         }
 
@@ -43,7 +44,14 @@ const OutfitCreatorPage = () => {
             return item ? item.image_url : null;
         }).filter(Boolean);
 
-        setSavedOutfit(selectedImages);
+        setPreviewOutfit(selectedImages);
+    };
+
+    const handleSaveOutfit = () => {
+        if (previewOutfit && previewOutfit.length > 0) {
+            setSavedOutfits([...savedOutfits, previewOutfit]);
+            setPreviewOutfit(null); // Close preview after saving
+        }
     };
 
     return (
@@ -90,19 +98,41 @@ const OutfitCreatorPage = () => {
                 </select>
             </div>
 
-            <button onClick={handleSaveOutfit}>Save Outfit</button>
+            <button onClick={handleGenerateOutfit}>Generate</button>
 
-            {savedOutfit && (
+            <div>
+                <h3>Saved Outfits</h3>
+                <div style={{ display: 'flex', flexWrap: 'wrap', gap: '20px' }}>
+                    {savedOutfits.map((outfit, index) => (
+                        <div key={index} style={{ border: '1px solid #ddd', padding: '10px' }}>
+                            {outfit.length === 1 ? (
+                                <img src={outfit[0]} alt="Saved Outfit" style={{ maxHeight: '200px' }} />
+                            ) : (
+                                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '10px' }}>
+                                    {outfit.map((image, idx) => (
+                                        <img key={idx} src={image} alt="Outfit item" style={{ maxHeight: '150px' }} />
+                                    ))}
+                                </div>
+                            )}
+                        </div>
+                    ))}
+                </div>
+            </div>
+
+            {previewOutfit && (
                 <div style={{
                     position: 'fixed', top: 0, left: 0, width: '100%', height: '100%', 
                     backgroundColor: 'rgba(0, 0, 0, 0.8)', display: 'flex', 
                     justifyContent: 'center', alignItems: 'center', flexDirection: 'column'
                 }}>
-                    <button onClick={() => setSavedOutfit(null)} style={{ marginBottom: '20px', padding: '10px' }}>
+                    <button onClick={() => setPreviewOutfit(null)} style={{ marginBottom: '20px', padding: '10px' }}>
                         Close Outfit
                     </button>
+                    <button onClick={handleSaveOutfit} style={{ marginBottom: '20px', padding: '10px' }}>
+                        Save
+                    </button>
                     <div style={{ display: 'flex', gap: '20px' }}>
-                        {savedOutfit.map((image, index) => (
+                        {previewOutfit.map((image, index) => (
                             <img key={index} src={image} alt="Outfit item" style={{ maxHeight: '400px' }} />
                         ))}
                     </div>
