@@ -7,6 +7,7 @@ import OutfitCreatorPage from './components/OutfitCreatorPage';
 // import DashboardPage from './components/DashboardPage';
 import HomePage from './pages/HomePage';
 import { AuthProvider } from './context/AuthContext';
+import './index.css';
 
 function App() {
     return (

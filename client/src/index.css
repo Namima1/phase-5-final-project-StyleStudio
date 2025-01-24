@@ -5,3 +5,16 @@
   --text: hsla(0, 0%, 100%, 0.88);
 }
 
+body {
+  background: 
+    linear-gradient(rgba(255, 255, 255, 0.6), rgba(255, 255, 255, 0.4)), 
+    url('/Users/namima/Development/code/Phase5-FinalProject/client/src/assets/images/Background.jpeg'); 
+  background-size: cover;  
+  background-position: center; 
+  background-attachment: fixed; 
+  background-repeat: no-repeat; 
+  font-family: Arial, sans-serif; 
+  margin: 0;
+  padding: 0;
+}
+
