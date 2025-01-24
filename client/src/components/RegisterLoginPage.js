@@ -1,7 +1,11 @@
-import React, { useState } from 'react';
+import React, { useState, useContext } from 'react';
 import axios from 'axios';
+import { AuthContext } from '../context/AuthContext';
+import { useNavigate } from 'react-router-dom';
 
 const RegisterLoginPage = () => {
+    const { setIsAuthenticated } = useContext(AuthContext);
+    const navigate = useNavigate();
     const [formData, setFormData] = useState({
         username: '',
         email: '',
@@ -20,15 +24,16 @@ const RegisterLoginPage = () => {
             : 'http://127.0.0.1:5000/login';
 
         try {
-            const response = await axios.post(url, formData, {
+            await axios.post(url, formData, {
                 headers: {
                     'Content-Type': 'application/json'
                 },
                 withCredentials: true
             });
 
-            console.log(`${isRegistering ? 'Registration' : 'Login'} successful:`, response.data);
             alert(`${isRegistering ? 'Registration' : 'Login'} successful!`);
+            setIsAuthenticated(true);
+            navigate('/dashboard');
         } catch (error) {
             console.error(`Error ${isRegistering ? 'registering' : 'logging in'}:`, error.response?.data || error.message);
             alert(error.response?.data?.error || `Failed to ${isRegistering ? 'register' : 'login'}`);
