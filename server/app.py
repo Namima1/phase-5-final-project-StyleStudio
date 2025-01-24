@@ -4,9 +4,17 @@ import base64
 from config import app, db, bcrypt
 from models import ClothingItem, Outfit, OutfitItem, User
 from flask_cors import CORS
+from datetime import timedelta
+import logging
+
+# Configure logging
+logging.basicConfig(level=logging.INFO)
 
 # Apply CORS globally
 CORS(app, resources={r"/*": {"origins": "http://localhost:3000"}}, supports_credentials=True)
+
+# Configure session settings
+app.config['PERMANENT_SESSION_LIFETIME'] = timedelta(days=1)
 
 # Configure upload folder
 UPLOAD_FOLDER = os.path.join(os.getcwd(), 'static/uploads')
@@ -40,6 +48,7 @@ def register():
     db.session.add(new_user)
     db.session.commit()
 
+    logging.info(f"New user registered: {new_user.email}")
     return jsonify({"message": "User registered successfully", "user_id": new_user.id}), 201
 
 @app.route('/login', methods=['POST'])
@@ -50,15 +59,28 @@ def login():
 
     if user and bcrypt.check_password_hash(user.password, data.get('password')):
         session['user_id'] = user.id
+        session.permanent = True  # Set session lifetime
+        logging.info(f"User logged in: {user.email}")
         return jsonify({"message": "Login successful", "user_id": user.id}), 200
     else:
+        logging.warning(f"Failed login attempt for email: {data.get('email')}")
         return jsonify({"error": "Invalid email or password"}), 401
 
 @app.route('/logout', methods=['POST'])
 def logout():
     """Logout user"""
     session.pop('user_id', None)
+    logging.info("User logged out")
     return jsonify({"message": "Logout successful"}), 200
+
+@app.route('/check-session', methods=['GET'])
+def check_session():
+    """Check if a user session exists"""
+    if 'user_id' in session:
+        logging.info(f"Session active for user ID: {session['user_id']}")
+        return jsonify({"authenticated": True, "user_id": session['user_id']}), 200
+    logging.info("No active session found.")
+    return jsonify({"authenticated": False}), 401
 
 # ---------------- CLOTHING ENDPOINTS ----------------
 
@@ -112,6 +134,7 @@ def upload_clothing_base64():
             "image_url": new_clothing_item.image_url
         }), 201
     except Exception as e:
+        logging.error(f"Error uploading clothing item: {e}")
         return jsonify({"error": str(e)}), 500
 
 @app.route('/clothing/<int:item_id>', methods=['PATCH'])
@@ -167,6 +190,7 @@ def uploaded_file(filename):
     try:
         return send_from_directory(app.config['UPLOAD_FOLDER'], filename)
     except Exception as e:
+        logging.error(f"File not found: {filename}")
         return jsonify({"error": str(e)}), 404
 
 # ---------------- CORS CONFIGURATION ----------------
