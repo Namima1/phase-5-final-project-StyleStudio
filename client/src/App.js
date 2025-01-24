@@ -4,10 +4,9 @@ import NavBar from './components/NavBar';
 import RegisterLoginPage from './components/RegisterLoginPage';
 import ClosetPage from './components/ClosetPage';
 import OutfitCreatorPage from './components/OutfitCreatorPage';
-import DashboardPage from './components/DashboardPage';
+// import DashboardPage from './components/DashboardPage';
 import HomePage from './pages/HomePage';
 import { AuthProvider } from './context/AuthContext';
-
 
 function App() {
     return (
@@ -20,7 +19,7 @@ function App() {
                     <Route path="/login" element={<RegisterLoginPage />} />
                     <Route path="/closet" element={<ClosetPage />} />
                     <Route path="/outfit-creator" element={<OutfitCreatorPage />} />
-                    <Route path="/dashboard" element={<DashboardPage />} />
+                    {/* <Route path="/dashboard" element={<DashboardPage />} /> */}
                 </Routes>
             </Router>
         </AuthProvider>
