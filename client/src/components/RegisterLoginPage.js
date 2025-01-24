@@ -20,9 +20,11 @@ const RegisterLoginPage = () => {
     const handleSubmit = async (e) => {
         e.preventDefault();
         const url = isRegistering 
-            ? 'http://127.0.0.1:5000/register' 
-            : 'http://127.0.0.1:5000/login';
-
+            ? 'http://localhost:5000/register' 
+            : 'http://localhost:5000/login';
+    
+        console.log("Submitting:", formData);  // Debugging
+    
         try {
             await axios.post(url, formData, {
                 headers: {
@@ -30,15 +32,15 @@ const RegisterLoginPage = () => {
                 },
                 withCredentials: true
             });
-
+    
             alert(`${isRegistering ? 'Registration' : 'Login'} successful!`);
             setIsAuthenticated(true);
-            navigate('/dashboard');
+            navigate('/');
         } catch (error) {
             console.error(`Error ${isRegistering ? 'registering' : 'logging in'}:`, error.response?.data || error.message);
             alert(error.response?.data?.error || `Failed to ${isRegistering ? 'register' : 'login'}`);
         }
-    };
+    };    
 
     return (
         <div>
