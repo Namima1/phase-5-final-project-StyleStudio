@@ -11,6 +11,7 @@ const OutfitCreatorPage = () => {
     });
     const [savedOutfits, setSavedOutfits] = useState([]); // Store saved outfits
     const [previewOutfit, setPreviewOutfit] = useState(null);
+    const [editingOutfitIndex, setEditingOutfitIndex] = useState(null);
 
     useEffect(() => {
         fetchClothingItems();
@@ -49,8 +50,27 @@ const OutfitCreatorPage = () => {
 
     const handleSaveOutfit = () => {
         if (previewOutfit && previewOutfit.length > 0) {
-            setSavedOutfits([...savedOutfits, previewOutfit]);
+            if (editingOutfitIndex !== null) {
+                const updatedOutfits = [...savedOutfits];
+                updatedOutfits[editingOutfitIndex] = previewOutfit;
+                setSavedOutfits(updatedOutfits);
+                setEditingOutfitIndex(null);
+            } else {
+                setSavedOutfits([...savedOutfits, previewOutfit]);
+            }
             setPreviewOutfit(null); // Close preview after saving
+        }
+    };
+
+    const handleEditOutfit = (index) => {
+        setPreviewOutfit(savedOutfits[index]);
+        setEditingOutfitIndex(index);
+    };
+
+    const handleDeleteOutfit = (index) => {
+        if (window.confirm("Are you sure you want to delete this outfit?")) {
+            const updatedOutfits = savedOutfits.filter((_, idx) => idx !== index);
+            setSavedOutfits(updatedOutfits);
         }
     };
 
@@ -104,16 +124,17 @@ const OutfitCreatorPage = () => {
                 <h3>Saved Outfits</h3>
                 <div style={{ display: 'flex', flexWrap: 'wrap', gap: '20px' }}>
                     {savedOutfits.map((outfit, index) => (
-                        <div key={index} style={{ border: '1px solid #ddd', padding: '10px' }}>
-                            {outfit.length === 1 ? (
-                                <img src={outfit[0]} alt="Saved Outfit" style={{ maxHeight: '200px' }} />
-                            ) : (
-                                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '10px' }}>
-                                    {outfit.map((image, idx) => (
-                                        <img key={idx} src={image} alt="Outfit item" style={{ maxHeight: '150px' }} />
-                                    ))}
-                                </div>
-                            )}
+                        <div 
+                            key={index} 
+                            style={{ border: '1px solid #ddd', padding: '10px', cursor: 'pointer' }}
+                            onClick={() => handleEditOutfit(index)}
+                        >
+                            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '10px' }}>
+                                {outfit.map((image, idx) => (
+                                    <img key={idx} src={image} alt="Outfit item" style={{ maxHeight: '150px' }} />
+                                ))}
+                            </div>
+                            <button onClick={(e) => { e.stopPropagation(); handleDeleteOutfit(index); }}>Delete</button>
                         </div>
                     ))}
                 </div>
