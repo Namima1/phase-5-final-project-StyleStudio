@@ -20,7 +20,7 @@ function App() {
                     <Route path="/login" element={<RegisterLoginPage />} />
                     <Route path="/closet" element={<ClosetPage />} />
                     <Route path="/outfit-creator" element={<OutfitCreatorPage />} />
-                    <Route path="/dashboard" element={<DashboardPage />} />
+                    {/* <Route path="/dashboard" element={<DashboardPage />} /> */}
                 </Routes>
             </Router>
         </AuthProvider>
