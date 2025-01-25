@@ -1,4 +1,5 @@
 from flask import request, jsonify, send_from_directory, session
+from flask_session import Session
 import os
 import base64
 from config import app, db, bcrypt
@@ -20,9 +21,16 @@ app.config['PERMANENT_SESSION_LIFETIME'] = timedelta(days=1)
 UPLOAD_FOLDER = os.path.join(os.getcwd(), 'static/uploads')
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 
+app.config["SESSION_PERMANENT"] = True
+app.config["SESSION_TYPE"] = "filesystem"
+app.config["SESSION_COOKIE_SAMESITE"] = "None"
+app.config["SESSION_COOKIE_SECURE"]= "True"
+# Session(app)
+
 # Ensure the upload folder exists
 if not os.path.exists(UPLOAD_FOLDER):
     os.makedirs(UPLOAD_FOLDER)
+
 
 @app.route('/')
 def home():
@@ -56,10 +64,14 @@ def login():
     """Login user"""
     data = request.get_json()
     user = User.query.filter_by(email=data.get('email')).first()
+    print(user)
+    print(user.id)
 
     if user and bcrypt.check_password_hash(user.password, data.get('password')):
-        session['user_id'] = user.id
         session.permanent = True  # Set session lifetime
+        print(user.id)
+        session['user_id'] = user.id
+        print(session.get("user_id"))
         logging.info(f"User logged in: {user.email}")
         return jsonify({"message": "Login successful", "user_id": user.id}), 200
     else:
@@ -76,6 +88,8 @@ def logout():
 @app.route('/check-session', methods=['GET'])
 def check_session():
     """Check if a user session exists"""
+    print(session)
+    print(session.get("user_id"))
     if 'user_id' in session:
         logging.info(f"Session active for user ID: {session['user_id']}")
         return jsonify({"authenticated": True, "user_id": session['user_id']}), 200
@@ -93,7 +107,23 @@ def get_clothing():
             "id": item.id,
             "name": item.name,
             "category": item.category,
-            "image_url": item.image_url
+            "image_url": item.image_url,
+            "user_id": item.user_id
+        } for item in items
+    ])
+    return response
+
+@app.route('/clothing/<int:user_id>', methods=['GET'])
+def get_clothing_by_user_id(user_id):
+    """Retrieve all clothing items"""
+    items = ClothingItem.query.filter_by(user_id)
+    response = jsonify([
+        {
+            "id": item.id,
+            "name": item.name,
+            "category": item.category,
+            "image_url": item.image_url, 
+            "user_id": item.user_id
         } for item in items
     ])
     return response
@@ -205,4 +235,5 @@ def add_cors_headers(response):
     return response
 
 if __name__ == '__main__':
+    Session(app)
     app.run(debug=True, port=5000)

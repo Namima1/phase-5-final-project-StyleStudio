@@ -1,5 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
+import { useContext } from 'react';
+import { AuthContext } from '../context/AuthContext';
 
 const OutfitCreatorPage = () => {
     const [clothingItems, setClothingItems] = useState([]);
@@ -12,7 +14,9 @@ const OutfitCreatorPage = () => {
     const [savedOutfits, setSavedOutfits] = useState([]); // Store saved outfits
     const [previewOutfit, setPreviewOutfit] = useState(null);
     const [editingOutfitIndex, setEditingOutfitIndex] = useState(null);
-
+    const {userId} = useContext(AuthContext)
+    console.log(userId)
+    
     useEffect(() => {
         fetchClothingItems();
     }, []);

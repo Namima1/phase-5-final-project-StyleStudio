@@ -21,7 +21,7 @@ const NavBar = () => {
                     <>
                         <li><Link to="/closet">Closet</Link></li>
                         <li><Link to="/outfit-creator">Outfit Creator</Link></li>
-                        {/* <li><Link to="/dashboard">Dashboard</Link></li> */}
+                        <li><Link to="/dashboard">Dashboard</Link></li>
                         <li><button onClick={handleLogout}>Logout</button></li>
                     </>
                 )}

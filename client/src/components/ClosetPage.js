@@ -2,11 +2,15 @@ import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 import { Formik, Form, Field, ErrorMessage } from 'formik';
 import * as Yup from 'yup';
+import { useContext } from 'react';
+import { AuthContext } from '../context/AuthContext';
 
 const ClosetPage = () => {
     const [clothingItems, setClothingItems] = useState([]);
     const [showUploadForm, setShowUploadForm] = useState(false);
     const [editingItem, setEditingItem] = useState(null);
+    const {userId} = useContext(AuthContext)
+    console.log(userId)
 
     useEffect(() => {
         fetchClothingItems();
@@ -36,7 +40,7 @@ const ClosetPage = () => {
             const payload = {
                 name: values.name,
                 category: values.category,
-                user_id: 1,
+                user_id: userId,
                 image: base64Image,
             };
 
