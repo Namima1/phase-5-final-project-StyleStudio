@@ -15,16 +15,18 @@ function App() {
         <AuthProvider>
             <Router>
                 <NavBar />
+                <div className='content'>
                 <Routes>
                     <Route path="/" element={<HomePage />} />
                     <Route path="/register" element={<RegisterLoginPage />} />
                     <Route path="/login" element={<RegisterLoginPage />} />
                     <Route path="/closet" element={<ClosetPage />} />
                     <Route path="/outfit-creator" element={<OutfitCreatorPage />} />
-                    <Route path="/dashboard" element={<DashboardPage />} />
+                    {/* <Route path="/dashboard" element={<DashboardPage />} /> */}
                 </Routes>
-            </Router>
-        </AuthProvider>
+            </div>
+        </Router>
+    </AuthProvider>
     );
 }
 
