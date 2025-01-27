@@ -111,16 +111,17 @@ def get_clothing():
     return response
 
 @app.route('/clothing/<int:user_id>', methods=['GET'])
-def get_clothing_by_user_id(user_id):
+def get_clothing_by_id(user_id):
     """Retrieve all clothing items"""
-    items = ClothingItem.query.filter_by(user_id)
+    print(id)
+    items = ClothingItem.query.filter_by(user_id = user_id)
     response = jsonify([
         {
             "id": item.id,
             "name": item.name,
             "category": item.category,
             "image_url": item.image_url, 
-            "user_id": item.user_id
+            "user_id": item.id
         } for item in items
     ])
     return response

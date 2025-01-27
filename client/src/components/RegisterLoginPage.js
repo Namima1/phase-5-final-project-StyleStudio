@@ -4,7 +4,7 @@ import { AuthContext } from '../context/AuthContext';
 import { useNavigate } from 'react-router-dom';
 
 const RegisterLoginPage = () => {
-    const { setIsAuthenticated } = useContext(AuthContext);
+    const { setIsAuthenticated, setUserId } = useContext(AuthContext);
     const navigate = useNavigate();
     const [formData, setFormData] = useState({
         username: '',
@@ -20,27 +20,26 @@ const RegisterLoginPage = () => {
     const handleSubmit = async (e) => {
         e.preventDefault();
         const url = isRegistering 
-            ? 'http://localhost:5000/register' 
-            : 'http://localhost:5000/login';
-    
-        console.log("Submitting:", formData);  // Debugging
-    
+            ? 'http://127.0.0.1:5000/register' 
+            : 'http://127.0.0.1:5000/login';
+
         try {
-            await axios.post(url, formData, {
+            const response = await axios.post(url, formData, {
                 headers: {
                     'Content-Type': 'application/json'
                 },
                 withCredentials: true
             });
-    
+
             alert(`${isRegistering ? 'Registration' : 'Login'} successful!`);
             setIsAuthenticated(true);
+            setUserId(response.data.user_id)
             navigate('/');
         } catch (error) {
             console.error(`Error ${isRegistering ? 'registering' : 'logging in'}:`, error.response?.data || error.message);
             alert(error.response?.data?.error || `Failed to ${isRegistering ? 'register' : 'login'}`);
         }
-    };    
+    };
 
     return (
         <div>

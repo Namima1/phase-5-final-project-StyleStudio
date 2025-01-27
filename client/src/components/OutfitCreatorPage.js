@@ -16,7 +16,7 @@ const OutfitCreatorPage = () => {
     const [editingOutfitIndex, setEditingOutfitIndex] = useState(null);
     const {userId} = useContext(AuthContext)
     console.log(userId)
-    
+
     useEffect(() => {
         fetchClothingItems();
     }, []);
@@ -83,7 +83,7 @@ const OutfitCreatorPage = () => {
             <h2>Create Your Outfit</h2>
 
             <div>
-                <label>Top:</label>
+                <label className='dropdown-label'>Top:</label>
                 <select name="top" value={outfit.top} onChange={handleSelectChange}>
                     <option value="">Select a top</option>
                     {clothingItems.filter(item => item.category === 'Tops').map(item => (
@@ -93,7 +93,17 @@ const OutfitCreatorPage = () => {
             </div>
 
             <div>
-                <label>Bottom:</label>
+                <label className='dropdown-label'>Dresses:</label>
+                <select name="dresses" value={outfit.dresses} onChange={handleSelectChange}>
+                    <option value="">Select a dress</option>
+                    {clothingItems.filter(item => item.category === 'Dresses').map(item => (
+                        <option key={item.id} value={item.id}>{item.name}</option>
+                    ))}
+                </select>
+            </div>
+
+            <div>
+                <label className='dropdown-label'>Bottom:</label>
                 <select name="bottom" value={outfit.bottom} onChange={handleSelectChange}>
                     <option value="">Select a bottom</option>
                     {clothingItems.filter(item => item.category === 'Bottoms').map(item => (
@@ -103,7 +113,7 @@ const OutfitCreatorPage = () => {
             </div>
 
             <div>
-                <label>Shoes:</label>
+                <label className='dropdown-label'>Shoes:</label>
                 <select name="shoes" value={outfit.shoes} onChange={handleSelectChange}>
                     <option value="">Select shoes</option>
                     {clothingItems.filter(item => item.category === 'Shoes').map(item => (
@@ -113,7 +123,7 @@ const OutfitCreatorPage = () => {
             </div>
 
             <div>
-                <label>Accessories:</label>
+                <label className='dropdown-label'>Accessories:</label>
                 <select name="accessories" value={outfit.accessories} onChange={handleSelectChange}>
                     <option value="">Select accessories</option>
                     {clothingItems.filter(item => item.category === 'Accessories').map(item => (

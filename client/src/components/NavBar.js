@@ -1,6 +1,7 @@
 import React, { useContext } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { AuthContext } from '../context/AuthContext';
+import '../index.css';  // Ensure this import exists to apply the styles
 
 const NavBar = () => {
     const { isAuthenticated, logout } = useContext(AuthContext);
@@ -12,19 +13,20 @@ const NavBar = () => {
     };
 
     return (
-        <nav>
+        <nav className="navbar">
             <ul>
-                <li><Link to="/">Home</Link></li>
-                {!isAuthenticated ? (
-                    <li><Link to="/register">Register/Login</Link></li>
-                ) : (
-                    <>
-                        <li><Link to="/closet">Closet</Link></li>
-                        <li><Link to="/outfit-creator">Outfit Creator</Link></li>
-                        <li><Link to="/dashboard">Dashboard</Link></li>
-                        <li><button onClick={handleLogout}>Logout</button></li>
-                    </>
-                )}
+            <li><Link to="/" className="nav-button">Home</Link></li>
+            {!isAuthenticated ? (
+                <li><Link to="/register" className="nav-button">Register/Login</Link></li>
+            ) : (
+                <>
+                    <li><Link to="/closet" className="nav-button">Closet</Link></li>
+                    <li><Link to="/outfit-creator" className="nav-button">Outfit Creator</Link></li>
+                    {/* <Link to="/dashboard" className="nav-button">Dashboard</Link> */}
+                    <li><button onClick={handleLogout} className="nav-button">Logout</button></li>
+
+                </>
+            )}
             </ul>
         </nav>
     );
