@@ -37,7 +37,7 @@ const NewClothingItemForm = () => {
             setError('All fields are required');
             return;
         }
-        try {
+        try { console.log(formData)
             await addClothingItem(formData);
             setFormData({ name: '', category: '', user_id: '' });
             setSuccess('Clothing item added successfully!');
@@ -45,6 +45,7 @@ const NewClothingItemForm = () => {
             setError(err.response?.data?.error || 'Error adding clothing item. Please try again.');
         }
     };
+
 
     return (
         <div>
