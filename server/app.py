@@ -1,18 +1,14 @@
 from flask import request, jsonify, send_from_directory, session
 from flask_session import Session
 import os
-import base64
 from config import app, db, bcrypt
 from models import ClothingItem, Outfit, OutfitItem, User
-from flask_cors import CORS
 from datetime import timedelta
 import logging
+from werkzeug.utils import secure_filename
 
 # Configure logging
 logging.basicConfig(level=logging.INFO)
-
-# Apply CORS globally
-CORS(app, resources={r"/*": {"origins": "http://localhost:3000"}}, supports_credentials=True)
 
 # Configure session settings
 app.config['PERMANENT_SESSION_LIFETIME'] = timedelta(days=1)
@@ -28,8 +24,8 @@ app.config["SESSION_COOKIE_SECURE"]= "True"
 # Session(app)
 
 # Ensure the upload folder exists
-if not os.path.exists(UPLOAD_FOLDER):
-    os.makedirs(UPLOAD_FOLDER)
+if not os.path.exists(app.config['UPLOAD_FOLDER']):
+    os.makedirs(app.config['UPLOAD_FOLDER'])
 
 
 @app.route('/')
@@ -42,6 +38,7 @@ def home():
 def register():
     """Register a new user"""
     data = request.get_json()
+    print(data)  # Debugging to check received data
 
     if not data.get('username') or not data.get('email') or not data.get('password'):
         return jsonify({"error": "All fields are required"}), 400
@@ -129,44 +126,54 @@ def get_clothing_by_id(user_id):
     ])
     return response
 
-@app.route('/clothing/upload_base64', methods=['POST'])
-def upload_clothing_base64():
-    """Upload a clothing item with Base64 encoded image"""
-    data = request.get_json()
+ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg', 'gif'}
+app.config['MAX_CONTENT_LENGTH'] = 16 * 1024 * 1024  # Limit upload size to 16MB
 
-    if 'image' not in data or not data['image']:
-        return jsonify({"error": "Image data is required"}), 400
+def allowed_file(filename):
+    return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
 
-    try:
-        image_data = data['image'].split(',')[1]
-        image_bytes = base64.b64decode(image_data)
-        
-        filename = f"{data['name'].replace(' ', '_')}.png"
+@app.route('/clothing/upload', methods=['POST'])
+def upload_clothing():
+    if 'file' not in request.files:
+        return jsonify({"error": "No file part"}), 400
+
+    file = request.files['file']
+    name = request.form.get('name')
+    category = request.form.get('category')
+
+    if not name or not category:
+        return jsonify({"error": "Name and category are required"}), 400
+
+    if file.filename == '':
+        return jsonify({"error": "No selected file"}), 400
+
+    if file and allowed_file(file.filename):
+        filename = secure_filename(file.filename)
         file_path = os.path.join(app.config['UPLOAD_FOLDER'], filename)
 
-        with open(file_path, "wb") as f:
-            f.write(image_bytes)
-
-        new_clothing_item = ClothingItem(
-            name=data['name'],
-            category=data['category'],
-            user_id=data.get('user_id'),
-            image_url=f"http://127.0.0.1:5000/static/uploads/{filename}"
-        )
-
-        db.session.add(new_clothing_item)
-        db.session.commit()
+        try:
+            file.save(file_path)
+            new_clothing_item = ClothingItem(
+                name=name,
+                category=category,
+                image_url=f"/static/uploads/{filename}"
+            )
+            db.session.add(new_clothing_item)
+            db.session.commit()
+        except Exception as e:
+            app.logger.error(f"Error saving file: {e}")
+            return jsonify({"error": "Failed to save the file"}), 500
 
         return jsonify({
             "message": "Clothing item uploaded successfully",
             "id": new_clothing_item.id,
             "name": new_clothing_item.name,
             "category": new_clothing_item.category,
-            "image_url": new_clothing_item.image_url
+            "image_url": f"/static/uploads/{filename}"
         }), 201
-    except Exception as e:
-        logging.error(f"Error uploading clothing item: {e}")
-        return jsonify({"error": str(e)}), 500
+
+    return jsonify({"error": "Invalid file format"}), 400
+
 
 @app.route('/clothing/<int:item_id>', methods=['PATCH'])
 def update_clothing(item_id):
@@ -175,20 +182,22 @@ def update_clothing(item_id):
     if not item:
         return jsonify({"error": f"Clothing item with ID {item_id} not found"}), 404
 
-    data = request.get_json()
-    item.name = data.get('name', item.name)
-    item.category = data.get('category', item.category)
+    item.name = request.form.get('name', item.name)
+    item.category = request.form.get('category', item.category)
 
-    if 'image' in data and data['image']:
-        image_data = data['image'].split(',')[1]
-        image_bytes = base64.b64decode(image_data)
-        filename = f"{item.name.replace(' ', '_')}.png"
-        file_path = os.path.join(app.config['UPLOAD_FOLDER'], filename)
+    if 'file' in request.files:
+        file = request.files['file']
+        if file and allowed_file(file.filename):
+            filename = secure_filename(file.filename)
+            file_path = os.path.join(app.config['UPLOAD_FOLDER'], filename)
+            
+            try:
+                file.save(file_path)
+            except Exception as e:
+                logging.error(f"Error saving file: {e}")
+                return jsonify({"error": "Failed to save the file"}), 500
 
-        with open(file_path, "wb") as f:
-            f.write(image_bytes)
-
-        item.image_url = f"http://127.0.0.1:5000/static/uploads/{filename}"
+            item.image_url = f"http://127.0.0.1:5000/static/uploads/{filename}"
 
     db.session.commit()
     return jsonify({
@@ -206,7 +215,8 @@ def delete_clothing(item_id):
     if not item:
         return jsonify({"error": f"Clothing item with ID {item_id} not found"}), 404
 
-    image_path = item.image_url.replace('http://127.0.0.1:5000/', '')
+    image_filename = os.path.basename(item.image_url)
+    image_path = os.path.join(app.config['UPLOAD_FOLDER'], image_filename)
 
     if os.path.exists(image_path):
         os.remove(image_path)
@@ -223,17 +233,6 @@ def uploaded_file(filename):
     except Exception as e:
         logging.error(f"File not found: {filename}")
         return jsonify({"error": str(e)}), 404
-
-# ---------------- CORS CONFIGURATION ----------------
-
-@app.after_request
-def add_cors_headers(response):
-    """Add CORS headers to allow cross-origin requests"""
-    response.headers["Access-Control-Allow-Origin"] = "http://localhost:3000"
-    response.headers["Access-Control-Allow-Methods"] = "GET, POST, PATCH, OPTIONS, PUT, DELETE"
-    response.headers["Access-Control-Allow-Headers"] = "Content-Type, Authorization"
-    response.headers["Access-Control-Allow-Credentials"] = "true"
-    return response
 
 if __name__ == '__main__':
     Session(app)
