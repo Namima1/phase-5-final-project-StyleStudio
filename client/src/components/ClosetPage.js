@@ -90,7 +90,7 @@ const ClosetPage = () => {
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '10px' }}>
                 {clothingItems.length > 0 ? (
                     clothingItems.map(item => (
-                        <div key={item.id} style={{ border: '1px solid black', padding: '10px' }}>
+                        <div className="closet-item" key={item.id} style={{ border: '1px solid black', padding: '10px' }}>
                             <img src={item.image_url} alt={item.name} style={{ width: '100%' }} />
                             <h3>{item.name}</h3>
                             <p>Category: {item.category}</p>
@@ -123,6 +123,7 @@ const ClosetPage = () => {
                             <Field as="select" name="category">
                                 <option value="">Select Category</option>
                                 <option value="Tops">Tops</option>
+                                <option value="Dresses">Dresses</option>
                                 <option value="Bottoms">Bottoms</option>
                                 <option value="Shoes">Shoes</option>
                                 <option value="Accessories">Accessories</option>

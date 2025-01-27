@@ -4,11 +4,10 @@ import NavBar from './components/NavBar';
 import RegisterLoginPage from './components/RegisterLoginPage';
 import ClosetPage from './components/ClosetPage';
 import OutfitCreatorPage from './components/OutfitCreatorPage';
-import DashboardPage from './components/DashboardPage';
+// import DashboardPage from './components/DashboardPage';
 import HomePage from './pages/HomePage';
 import { AuthProvider } from './context/AuthContext';
 import './index.css';
-
 
 function App() {
     return (
